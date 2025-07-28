@@ -1,0 +1,25 @@
+{
+  "name": "saraha-app",
+  "version": "1.0.0",
+  "description": "\"# saraha-app-new\"",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farhamostafa657/saraha-app-new.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/farhamostafa657/saraha-app-new/issues"
+  },
+  "homepage": "https://github.com/farhamostafa657/saraha-app-new#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.16.5"
+  }
+}
