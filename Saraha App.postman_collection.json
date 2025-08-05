@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "c7925c26-cf07-4eca-9460-62dcdc42d92d",
+		"name": "Saraha App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25032969"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "signUp",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODdlZWIwYzNiOWZjNzcwMTY2NzJjM2EiLCJpYXQiOjE3NTMyMjkxMTQsImV4cCI6MTc1MzIzNjMxNH0.YbY7RTIOuv7QS5MTQc0oiH_inZ-QPRyjbmn6KvI7R9M",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\":\"sarha\",\r\n      \"lastName\":\"mostafa\",\r\n      \"email\":\"farha@gmail.com\",\r\n      \"password\":\"test@123\",\r\n      \"gender\":\"female\",\r\n      \"phone\":\"01129557854\"\r\n      }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODdlZWIwYzNiOWZjNzcwMTY2NzJjM2EiLCJpYXQiOjE3NTMyMjkxMTQsImV4cCI6MTc1MzIzNjMxNH0.YbY7RTIOuv7QS5MTQc0oiH_inZ-QPRyjbmn6KvI7R9M",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \r\n      \"email\":\"farha@gmail.com\",\r\n      \"password\":\"test@123\",\r\n      \r\n      }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "get Profile",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": []
+		},
+		{
+			"name": "Messages",
+			"item": []
+		}
+	]
+}
