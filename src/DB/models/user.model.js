@@ -4,6 +4,16 @@ export const genderEnum = {
   male: "male",
   female: "female",
 };
+
+export const providers = {
+  system: "SYSTEM",
+  google: "GOOGLE",
+};
+
+export const roles = {
+  admin: "ADMIN",
+  user: "USER",
+};
 const userSchema = new Schema(
   {
     firstName: {
@@ -29,7 +39,9 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.provider == providers.system ? true : false;
+      },
     },
     gender: {
       type: String,
@@ -41,6 +53,22 @@ const userSchema = new Schema(
     },
     phone: String,
     confirmEmail: Date,
+    photo: String,
+    provider: {
+      type: String,
+      enum: {
+        values: Object.values(providers),
+        message: "provider must be either system or google",
+      },
+    },
+    role: {
+      type: String,
+      enum: {
+        values: Object.values(roles),
+        message: "role must be ADMIN or USER",
+      },
+      default: roles.user,
+    },
   },
   { timestamps: true }
 );

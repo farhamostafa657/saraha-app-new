@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 
-export const hash = async ({ plainText = "", salt = 12 }) => {
+export const hash = async ({ plainText = "", salt = +process.env.SALT }) => {
   return await bcrypt.hash(plainText, salt);
 };
 
