@@ -43,6 +43,7 @@ const userSchema = new Schema(
         return this.provider == providers.system ? true : false;
       },
     },
+    confirmEmailOtp: String,
     gender: {
       type: String,
       enum: {
@@ -51,6 +52,11 @@ const userSchema = new Schema(
       },
       default: genderEnum.male,
     },
+    forgetPasswordOTP: String,
+    deletedAt: Date,
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    restoredAt: Date,
+    restoredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     phone: String,
     confirmEmail: Date,
     photo: String,

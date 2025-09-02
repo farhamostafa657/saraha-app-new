@@ -7,6 +7,20 @@ export const findOne = async ({
   return await model.findOne(filter).select(select).populate(populate);
 };
 
+export const findOneAndUpdate = async ({
+  model,
+  filter = {},
+  data = {},
+  select = "",
+  populate = [],
+  options = { runValidators: true, new: true },
+} = {}) => {
+  return await model
+    .findOneAndUpdate(filter, { ...data, $inc: { __v: 1 } }, options)
+    .select(select)
+    .populate(populate);
+};
+
 export const findById = async ({
   model,
   id = "",
@@ -23,4 +37,17 @@ export const create = async ({
   options = { validateBeforeSave: true },
 } = {}) => {
   return await model.create(data, options);
+};
+
+export const updateOne = async ({
+  model,
+  filter = {},
+  data = {},
+  options = { runValidators: true },
+}) => {
+  return await model.updateOne(filter, { ...data, $inc: { __v: 1 } }, options);
+};
+
+export const deleteOne = async ({ model, filter = {} }) => {
+  return await model.deleteOne(filter);
 };
