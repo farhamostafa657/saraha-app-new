@@ -9,6 +9,7 @@ import {
   confirmEmailValidation,
   forgetPasswordValidation,
   loginValidation,
+  logOutValidation,
   refreshTokenValidation,
   resetPasswordValidation,
   signUpValidation,
@@ -19,6 +20,12 @@ const router = Router();
 
 router.post("/signup", validation(signUpValidation), authServiece.signUp);
 router.post("/login", validation(loginValidation), authServiece.login);
+router.post(
+  "/logout",
+  validation(logOutValidation),
+  authentication({ tokenType: tokenTypeEnum.access }),
+  authServiece.logout
+);
 router.post(
   "/social-login",
   validation(socialLoginValidation),

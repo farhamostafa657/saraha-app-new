@@ -1,6 +1,8 @@
 import { userModel } from "../DB/models/user.model.js";
 import { getSegnature, verifyToken } from "../Utils/token/token.js";
 import * as dbService from "../DB/dbService.js";
+import { tokenModel } from "../DB/models/token.model.js";
+import { decode } from "jsonwebtoken";
 
 export const tokenTypeEnum = {
   access: "access",
@@ -25,6 +27,16 @@ export const decodedToken = async ({
       ? signature.accessSignatur
       : signature.refreshSignature
   );
+
+  if (
+    decoded.jti &&
+    (await dbService.findOne({
+      model: tokenModel,
+      filter: { jti: decoded.jti },
+    }))
+  )
+    return next(new Error("Token Is Revoked", { cause: 401 }));
+
   const user = await dbService.findById({
     model: userModel,
     id: { _id: decoded._id },
@@ -32,16 +44,21 @@ export const decodedToken = async ({
 
   if (!user) return next(new Error("User Not Found ", { cause: 404 }));
 
-  return user;
+  if (user.changeCredentialsTime?.getTime() > decoded.iat * 1000)
+    return next(new Error("Token Expired", { cause: 401 }));
+
+  return { user, decoded };
 };
 
 export const authentication = ({ tokenType = tokenTypeEnum.access }) => {
   return async (req, res, next) => {
-    req.user = await decodedToken({
+    const { user, decoded } = await decodedToken({
       authorization: req.headers.authorization,
       tokenType,
       next,
     });
+    req.user = user;
+    req.decoded = decoded;
 
     return next();
   };

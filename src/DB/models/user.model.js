@@ -53,6 +53,7 @@ const userSchema = new Schema(
       default: genderEnum.male,
     },
     forgetPasswordOTP: String,
+    changeCredentialsTime: Date,
     deletedAt: Date,
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     restoredAt: Date,

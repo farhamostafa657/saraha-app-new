@@ -5,7 +5,8 @@ import { asyncHandler } from "../../Utils/asyncHandler.js";
 import { decrypt, encrypt } from "../../Utils/encryption/encryption.js";
 import { emailEvent } from "../../Utils/events/events.utils.js";
 import { successResponse } from "../../Utils/successResponse.js";
-import { verifyToken } from "../../Utils/token/token.js";
+import { logOutEnum, verifyToken } from "../../Utils/token/token.js";
+import { tokenModel } from "../../DB/models/token.model.js";
 
 export const getSingleUser = async (req, res, next) => {
   req.user.phone = decrypt(req.user.phone);
@@ -161,7 +162,7 @@ export const adminHardDelete = async (req, res, next) => {
 };
 
 export const updatePassword = async (req, res, next) => {
-  const { oldPassword, password } = req.body;
+  const { oldPassword, password, flag } = req.body;
 
   const mycompare = await compare({
     plainText: oldPassword,
@@ -171,11 +172,33 @@ export const updatePassword = async (req, res, next) => {
   if (!mycompare)
     return next(new Error("Invalid Old Password", { cause: 400 }));
 
+  let updatedDate = {};
+  switch (flag) {
+    case logOutEnum.logOutFromAllDivices:
+      updatedDate.changeCredentialsTime = Date.now();
+      break;
+    case logOutEnum.logout:
+      await dbService.create({
+        model: tokenModel,
+        data: [
+          {
+            jti: req.decoded.jti,
+            userId: req.user._id,
+            expiteIn: Date.now() - req.decoded.iat,
+          },
+        ],
+      });
+      break;
+    default:
+      break;
+  }
+
   const updated = await dbService.updateOne({
     model: userModel,
     filter: { _id: req.user._id },
     data: {
       password: await hash({ plainText: password }),
+      ...updatedDate,
     },
   });
 
@@ -184,7 +207,16 @@ export const updatePassword = async (req, res, next) => {
         res,
         statusCode: 200,
         message: " Paasword Updated Successfully",
-        data: user,
+        data: updated,
       })
     : next(new Error("Invalid Account", { cause: 400 }));
+};
+
+export const profileImage = async (req, res, next) => {
+  successResponse({
+    res,
+    statusCode: 200,
+    message: " Paasword Updated Successfully",
+    data: req.file,
+  });
 };

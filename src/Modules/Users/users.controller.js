@@ -15,6 +15,7 @@ import {
   updatePasswordValidation,
   updateProfileValidation,
 } from "./user.validation.js";
+import { uploadFileLocal } from "../../Utils/multer/multer.utils.js";
 
 const router = Router();
 
@@ -76,6 +77,13 @@ router.patch(
   authentication({ tokenType: tokenTypeEnum.access }),
   authorization({ accessRole: endPoints.updatePassword }),
   userService.updatePassword
+);
+
+router.patch(
+  "/profileImage",
+  authentication({ tokenType: tokenTypeEnum.access }),
+  uploadFileLocal().single("profileImage"),
+  userService.profileImage
 );
 
 export default router;

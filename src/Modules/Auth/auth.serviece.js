@@ -10,9 +10,15 @@ import { asyncHandler } from "../../Utils/asyncHandler.js";
 import { encrypt } from "../../Utils/encryption/encryption.js";
 import { hash, compare } from "../../Utils/hashing/hash.js";
 import { successResponse } from "../../Utils/successResponse.js";
-import { getSegnature, signToken } from "../../Utils/token/token.js";
+import {
+  getNewLoginCredwntials,
+  getSegnature,
+  logOutEnum,
+  signToken,
+} from "../../Utils/token/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { emailEvent } from "../../Utils/events/events.utils.js";
+import { tokenModel } from "../../DB/models/token.model.js";
 
 export const signUp = async (req, res, next) => {
   const {
@@ -73,36 +79,47 @@ export const login = async (req, res, next) => {
   const isMatch = await compare({ plainText: password, hash: user.password });
   if (!isMatch) return next(new Error("Invalid credentials", { cause: 401 }));
 
-  const accessToken = signToken({
-    payload: { _id: user._id },
-    signature:
-      user.role == roles.admin
-        ? process.env.ACCESS_ADMIN_SIGNATURE_TOKEN
-        : process.env.ACCESS_USER_SIGNATURE_TOKEN,
-    options: {
-      expiresIn: "1d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
-
-  const refreshToken = signToken({
-    payload: { _id: user._id },
-    signature:
-      user.role == roles.admin
-        ? process.env.REFRESH_ADMIN_SIGNATURE_TOKEN
-        : process.env.REFRESH_USER_SIGNATURE_TOKEN,
-    options: {
-      expiresIn: "7d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
+  const newCredential = await getNewLoginCredwntials(user);
   return successResponse({
     res,
     statusCode: 200,
     message: "User loged in successfully",
-    data: { accessToken, refreshToken },
+    data: newCredential,
+  });
+};
+
+export const logout = async (req, res, next) => {
+  const { flag } = req.body;
+
+  let status = 200;
+  switch (flag) {
+    case logOutEnum.logOutFromAllDivices:
+      await updateOne({
+        model: userModel,
+        filter: { _id: req.user._id },
+        data: { changeCredentialsTime: Date.now() },
+      });
+      break;
+
+    default:
+      await create({
+        model: tokenModel,
+        data: [
+          {
+            jti: req.decoded.jti,
+            userId: req.user._id,
+            expiresIn: Date.now() - req.decoded.exp,
+          },
+        ],
+      });
+      status = 201;
+      break;
+  }
+
+  return successResponse({
+    res,
+    statusCode: status,
+    message: "User Logout Successfully",
   });
 };
 
@@ -133,28 +150,12 @@ export const loginWithGmail = async (req, res, next) => {
 
   if (user) {
     if (user.provider == providers.google) {
-      const accessToken = signToken({
-        payload: { _id: user._id },
-        options: {
-          expiresIn: "1d",
-          issuer: "Saraha App",
-          subject: "Authentication",
-        },
-      });
-
-      const refreshToken = signToken({
-        payload: { _id: user._id },
-        options: {
-          expiresIn: "7d",
-          issuer: "Saraha App",
-          subject: "Authentication",
-        },
-      });
+      const newCredential = await getNewLoginCredwntials(user);
       return successResponse({
         res,
         statusCode: 200,
         message: "User loged in successfully",
-        data: { accessToken, refreshToken },
+        data: newCredential,
       });
     }
   }
@@ -173,60 +174,24 @@ export const loginWithGmail = async (req, res, next) => {
     ],
   });
 
-  const accessToken = signToken({
-    payload: { _id: user._id },
-    options: {
-      expiresIn: "1d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
-
-  const refreshToken = signToken({
-    payload: { _id: newUser._id },
-    options: {
-      expiresIn: "7d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
+  const newCredential = await getNewLoginCredwntials(newUser);
   return successResponse({
     res,
     statusCode: 201,
     message: "User created successfully",
-    data: { accessToken, refreshToken },
+    data: newCredential,
   });
 };
 
 export const refreshToken = async (req, res, next) => {
   const user = req.user;
-  let signature = await getSegnature({
-    signatureLevel: user.role == roles.admin ? roles.admin : roles.user,
-  });
-  const accessToken = signToken({
-    payload: { _id: user._id },
-    signature: signature.accessSignatur,
-    options: {
-      expiresIn: "1d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
 
-  const refreshToken = signToken({
-    payload: { _id: user._id },
-    signature: signature.refreshSignature,
-    options: {
-      expiresIn: "7d",
-      issuer: "Saraha App",
-      subject: "Authentication",
-    },
-  });
+  const newCredential = await getNewLoginCredwntials(user);
   return successResponse({
     res,
     statusCode: 200,
     message: "New criedential created successfully",
-    data: { accessToken, refreshToken },
+    data: newCredential,
   });
 };
 
